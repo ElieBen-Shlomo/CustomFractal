@@ -1,61 +1,85 @@
 import Graphics.Rendering.OpenGL
 import Graphics.UI.GLUT
+import Graphics.UI.GLUT.Window
 import Data.IORef
 
-width = 500 :: GLfloat
-height = 500 :: GLfloat
+screenWidth = 700
+screenHeight = 700
+widthDensity = 700 :: GLfloat
+heightDensity = 700 :: GLfloat 
 
 data Complex = C Float Float deriving (Show,Eq)
 instance Num Complex where
     fromInteger n = C (fromIntegral n) 0.0
     (C x y) * (C z t) = C (z*x - y*t) (y*z + x*t)
     (C x y) + (C z t) = C (x+z) (y+t)
-complex x y = C x y
-re (C x y)  = x
-im   (C x y)    = y
+-- complex x y = C x y
+-- re (C x y)  = x
+-- im   (C x y)    = y
 magnitude (C x y) = sqrt(x * x + y * y)
 
 type CustomFunction = Complex -> Complex -> Complex
+functionIterates :: CustomFunction -> Complex -> [Complex]
+functionIterates f c = iterate (\z -> f z c) c
 
-iteratedFunction :: Complex -> Complex -> CustomFunction -> Int -> Int
-iteratedFunction z c f 0 = 0
-iteratedFunction z c f n = if (magnitude z > 2 )
-          then n
-          else iteratedFunction (f z c) c f (n-1)
+type TruthCondition = Complex -> Bool
+firstIndexOfElementSatisfyingCondition :: [Complex] -> TruthCondition -> Int -> Int
+firstIndexOfElementSatisfyingCondition list condition n = snd $ head $ filter (\(z, n) -> condition z) enumeratedList where
+    enumeratedList = take n $ zip list [1,2..]
 
-iterations x y = iteratedFunction 0 (complex real imag) f 64
-                    where 
-                        f z c = z*z+c
-                        real = 2.0 * x / width
-                        imag = 2.0 * y / height
+numberOfIterations :: CustomFunction -> Complex -> TruthCondition -> Int -> Int
+numberOfIterations f z condition maxIterations = firstIndexOfElementSatisfyingCondition (functionIterates f z) condition maxIterations
 
-colouredPoints :: [(GLfloat,GLfloat,Color3 GLfloat)]
-colouredPoints = [ (x/width,y/height, intToColour $ iterations x y)|
-                    x <- [-width..width],
-                    y <- [-height..height]]
-                    where intToColour x =
-                            let
-                                colour :: Int -> GLfloat    
-                                colour x = 0.5 + 0.5*cos( fromIntegral x / 10 )
-                            in
-                                Color3 (colour x) (colour 20) (colour 50)
 
+-- iteratedFunction :: Complex -> Complex -> CustomFunction -> Int -> Int
+-- iteratedFunction z c f n = if (magnitude z > 2 )
+--           then n
+--           else iteratedFunction (f z c) c f (n+1)
+
+-- iterations x y n = numberOfIterations f (C real imag) n
+--                     where 
+--                         f z c = z*z+c
+--                         real = 2.0 * x / widthDensity
+--                         imag = 2.0 * y / heightDensity
+
+-- factor = 0.5
+-- shiftX = -0.5
+-- shiftY = -0.5
+-- colouredPoints :: [(GLfloat,GLfloat,Color3 GLfloat)]
+-- colouredPoints = [ (shiftX +factor*x/widthDensity, shiftY + factor*y/heightDensity, intToColour $ iterations x y)|
+--                     x <- [-widthDensity..widthDensity],
+--                     y <- [-heightDensity..heightDensity]]
+--                     where intToColour x =
+--                             let
+--                                 colour :: GLfloat -> GLfloat    
+--                                 colour x =  x 
+--                             in
+--                                 if x >= 50 then Color3 (colour 0) (colour 0) (colour 0) else Color3 (colour 100) (colour 50) (colour 200)
+--                                 --Color3 (colour x) (colour 20) (colour 50)
+
+condition :: TruthCondition                
+condition = (\z -> (magnitude z) > 2)  
+f z c =z*z + c
 main :: IO ()
-main = do
-  (progname,_) <- getArgsAndInitialize
-  initialDisplayMode $= [DoubleBuffered]
-  createWindow "Mandelbrot Set with Haskell and OpenGL"
-  displayCallback $= display
-  mainLoop where
-    display = do
-        clear [ColorBuffer] 
-        loadIdentity 
-        preservingMatrix drawMandelbrot
-        swapBuffers where
-            drawMandelbrot =
-                renderPrimitive Points $ do
-                    mapM_ drawColoredPoint colouredPoints
-                where
-                    drawColoredPoint (x,y,c) = do
-                        color c
-                        vertex $ Vertex3 x y 0
+main = print(numberOfIterations f (C (-1.5) 0.001) condition 100)
+
+-- main = do
+--   (progname,_) <- getArgsAndInitialize
+--   initialDisplayMode $= [DoubleBuffered]
+--   createWindow "Haskelbrot"
+--   windowSize $= Size screenWidth screenHeight
+--   displayCallback $= display
+--   mainLoop where
+--     display = do
+--         clear [ColorBuffer] 
+--         loadIdentity 
+--         preservingMatrix drawMandelbrot
+--         swapBuffers where
+--             drawMandelbrot =
+--                 renderPrimitive Points $ do
+--                     mapM_ drawColoredPoint colouredPoints
+--                 where
+--                     drawColoredPoint (x,y,c) = do
+--                         color c 
+--                         vertex $ Vertex3 x y 0
+
