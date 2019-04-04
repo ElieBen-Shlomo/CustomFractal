@@ -1,14 +1,8 @@
 module Fractal where
-
+    import Complexnumber
     import Graphics.Rendering.OpenGL
     import Graphics.UI.GLUT
     import Graphics.UI.GLUT.Window
-
-    data Complex = C Float Float deriving (Show,Eq)
-    instance Num Complex where
-        fromInteger n = C (fromIntegral n) 0.0
-        (C x y) * (C z t) = C (z*x - y*t) (y*z + x*t)
-        (C x y) + (C z t) = C (x+z) (y+t)
     
     magnitude :: Complex -> Float
     magnitude (C x y) = sqrt(x * x + y * y)
