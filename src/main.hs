@@ -19,9 +19,7 @@ type CustomFunction = Complex -> Complex -> Complex
 functionIterates :: CustomFunction -> Complex -> [Complex]
 functionIterates f c = iterate (\z -> f z c) c
 
-
-
-type TruthCondition = Complex -> Bool -- can I make Complex a generic type instead?
+type TruthCondition = Complex -> Bool 
 firstIndexOfElementSatisfyingCondition :: [Complex] -> TruthCondition -> Int
 firstIndexOfElementSatisfyingCondition [] _ = 0
 firstIndexOfElementSatisfyingCondition (x:xs) condition = if condition x then 1 else 1 + firstIndexOfElementSatisfyingCondition xs condition
@@ -29,21 +27,17 @@ firstIndexOfElementSatisfyingCondition (x:xs) condition = if condition x then 1 
 numberOfIterations :: CustomFunction -> Complex -> TruthCondition -> Int -> Int
 numberOfIterations f z condition maxIterations = firstIndexOfElementSatisfyingCondition (take maxIterations $ functionIterates f z) condition
 
-iteratedFunction :: Complex -> Complex -> CustomFunction -> Int -> Int
-iteratedFunction z c f n = if (magnitude z > 2 )
-          then n
-          else iteratedFunction (f z c) c f (n+1)
-
+iterations ::  Float -> Float -> Int -> Int          
 iterations x y n = numberOfIterations f (C real imag) condition n
                     where 
-                        f z c = z*z+c
+                        f z c = z * z + c
                         condition z = (magnitude z) > 2
                         real = 2.0 * x / widthDensity
                         imag = 2.0 * y / heightDensity
 
-factor = 1.0
-shiftX = -0.0
-shiftY = -0.0
+factor = 0.7
+shiftX = -0.3
+shiftY = -0.5
 colouredPoints :: [(GLfloat,GLfloat,Color3 GLfloat)]
 colouredPoints = [ (shiftX +factor*x/widthDensity, shiftY + factor*y/heightDensity, intToColour $ iterations x y 100)|
                     x <- [-widthDensity..widthDensity],
@@ -54,15 +48,12 @@ colouredPoints = [ (shiftX +factor*x/widthDensity, shiftY + factor*y/heightDensi
                                 colour :: Int -> GLfloat    
                                 colour n = fromIntegral n/50
 
-condition :: TruthCondition                
-condition = (\z -> (magnitude z) > 2)  
-f z c =z*z + c
-
-main :: IO ()
-main = do
+drawFractal :: Float ->  IO ()
+drawFractal exponent = do
   (progname,_) <- getArgsAndInitialize
   initialDisplayMode $= [DoubleBuffered]
   createWindow "Haskelbrot"
+  windowSize $= Size 600 600
   displayCallback $= display
   mainLoop where
     display = do
@@ -74,6 +65,14 @@ main = do
                 renderPrimitive Points $ do
                     mapM_ drawColoredPoint colouredPoints
                 where
+                    f z c = z * z + c
                     drawColoredPoint (x,y,c) = do
                         color c 
                         vertex $ Vertex3 x y 0
+
+
+main:: IO()
+main = do
+    putStrLn "Enter an integer exponent n for the formula z -> z^n + c"
+    exponent <- getLine
+    drawFractal (read exponent :: Int)
