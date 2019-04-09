@@ -1,9 +1,9 @@
 module Fractal where
-    import Complexnumber
+    import Maths
     import Graphics.Rendering.OpenGL
     import Graphics.UI.GLUT
     import Graphics.UI.GLUT.Window
-    
+
     magnitude :: Complex -> Float
     magnitude (C x y) = sqrt(x * x + y * y)
     

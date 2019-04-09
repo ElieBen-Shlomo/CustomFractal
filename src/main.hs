@@ -1,5 +1,5 @@
 import Fractal
-import Complexnumber
+import Maths
 
 import Graphics.Rendering.OpenGL
 import Graphics.UI.GLUT
@@ -21,13 +21,12 @@ drawFractal exponent = do
         swapBuffers where
             drawMandelbrot =
                 renderPrimitive Points $ do
-                    mapM_ drawColoredPoint $ colouredPoints f (0.5, (-0.3), (-0.5), (300::GLfloat), (300::GLfloat))
+                    mapM_ drawColoredPoint $ colouredPoints f (0.6, (-0.3), (-0.5), (300::GLfloat), (300::GLfloat))
                 where
                     f  = (\z c -> z <^> exponent + c) :: CustomFunction
                     drawColoredPoint (x,y,c) = do
                         color c 
                         vertex $ Vertex3 x y 0
-
 
 main:: IO()
 main = do
