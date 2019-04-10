@@ -11,6 +11,9 @@ module Maths where
     imag:: Complex -> Float
     imag (C a b) = b
 
+    mag :: Complex -> Float
+    mag (C a b) = sqrt(a^2 + b^2)
+
     (<^>) :: Complex -> Int -> Complex
     z <^> n = integerExponentiation z n
 
@@ -43,5 +46,3 @@ module Maths where
     arctan:: Complex -> Complex
     arctan z = infiniteSum f where
         f n = ((z <^> (2*n+1)) * (C ((-1)^n) 0)) </> (2*n+1)
-
-    

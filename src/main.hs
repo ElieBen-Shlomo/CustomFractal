@@ -21,7 +21,7 @@ drawFractal exponent = do
         swapBuffers where
             drawMandelbrot =
                 renderPrimitive Points $ do
-                    mapM_ drawColoredPoint $ colouredPoints f (0.6, (-0.3), (-0.5), (300::GLfloat), (300::GLfloat))
+                    mapM_ drawColoredPoint $ colouredPoints f (0.6, (-0.5), (-0.5), (300::GLfloat), (300::GLfloat))
                 where
                     f  = (\z c -> z <^> exponent + c) :: CustomFunction
                     drawColoredPoint (x,y,c) = do
